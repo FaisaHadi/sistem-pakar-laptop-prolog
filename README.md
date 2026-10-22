@@ -16,7 +16,7 @@ Proyek tugas besar kelompok mata kuliah Kecerdasan Buatan. Aplikasi terminal men
 
 | Bagian | Kondisi |
 | --- | --- |
-| Aplikasi | Konsultasi melalui terminal; belum ada antarmuka web atau desktop |
+| Aplikasi | Konsultasi CLI asli dan antarmuka web lokal Gamaban di folder clone ini |
 | Basis pengetahuan | 15 gejala G01–G15, 5 gangguan D01–D05, 2 indikasi I01–I02, 11 aturan R01–R11, 5 saran S01–S05 |
 | Penalaran | Backward chaining; memeriksa aturan alternatif dan mempertahankan jalur bukti |
 | Jawaban | `ya`, `tidak`, `tidak_tahu`; disimpan dalam memori selama satu sesi |
@@ -50,6 +50,7 @@ Tanggal kalender, format laporan, durasi video, nama anggota, dan penanggung jaw
 | --- | --- |
 | SWI-Prolog | Menjalankan aplikasi dan pengujian `plunit` |
 | VS Code | Mengedit kode dan membuka terminal proyek |
+| Browser | Menampilkan antarmuka web lokal Gamaban |
 | Ekstensi Codex | Membantu pengerjaan; tidak dibutuhkan oleh aplikasi saat dijalankan |
 | Git dan GitHub | Menyimpan riwayat perubahan dan berbagi pekerjaan tim |
 
@@ -66,7 +67,7 @@ Jika `swipl` tidak dikenali, pastikan folder `bin` instalasi SWI-Prolog masuk PA
 
 Pada komputer persiapan, versi yang diperiksa adalah SWI-Prolog 10.0.2, Git 2.47.0.windows.2, dan VS Code 1.142.0 x64. Tidak ada instalasi atau penggantian dependensi. Buka folder proyek lewat **File > Open Folder** di VS Code, lalu gunakan terminal PowerShell dari akar proyek; pengaturan `.vscode/` pribadi tidak diperlukan dan tidak dibagikan.
 
-## Menjalankan aplikasi dan tes
+## Menjalankan aplikasi CLI
 
 Jalankan dari folder yang berisi `README.md`, `src/`, dan `tests/`:
 
@@ -82,6 +83,20 @@ $LASTEXITCODE
 Ketik jawaban dengan huruf kecil, tanpa tanda titik, lalu tekan Enter. `ya` berarti kondisi sesuai dengan pengamatan atau hasil pemeriksaan; `tidak` berarti sudah dinilai tidak sesuai; `tidak_tahu` berarti belum diperiksa, belum memahami hasil, atau belum yakin. Gunakan satu kejadian gangguan dan baca bantuan setiap pertanyaan. Tidak perlu melakukan pemeriksaan baru selama konsultasi.
 
 Sesudah hasil muncul, ketik `baru` untuk mengosongkan data dan memulai sesi berikutnya, atau `selesai` untuk keluar. Jawaban tidak dapat dikoreksi di tengah sesi; mulai sesi baru jika ada salah input yang sudah diterima. EOF ketika pertanyaan berlangsung mengakhiri sesi sebagai belum selesai, bukan mengisi jawaban otomatis.
+
+## Menjalankan antarmuka Gamaban
+
+Folder ini adalah salinan UI terpisah dari versi CLI asli. Antarmuka Gamaban berjalan di browser lokal, sedangkan SWI-Prolog tetap menjalankan penalaran dan menghasilkan ringkasan.
+
+```powershell
+swipl -q -s src/web_app.pl -g server -t halt
+```
+
+Buka `http://localhost:8080` di browser. Biarkan terminal server tetap terbuka selama konsultasi; tekan `Ctrl+C` untuk menghentikannya. Antarmuka tidak memerlukan Node.js, Python, database, atau API key. Versi CLI tetap dapat dijalankan di folder ini dengan perintah CLI di atas; folder `sistem-pakar-laptop-prolog` di sebelahnya adalah salinan CLI asli yang tidak diubah.
+
+Pertanyaan dan bantuan UI dibaca langsung dari basis pengetahuan Prolog. Pilih salah satu jawaban, gunakan tombol **Butuh konteks?** untuk melihat bantuan, lalu gunakan **Kembali** jika ingin meninjau jawaban sebelumnya. Setelah semua pertanyaan selesai, UI mengirim jawaban ke mesin Prolog untuk mendapatkan dugaan, jalur aturan, alasan, informasi yang belum tersedia, dan saran.
+
+> Status pengetahuan tetap draf dan belum divalidasi teknisi. Hasil aplikasi adalah dugaan awal, bukan diagnosis final.
 
 ## Cakupan dugaan
 

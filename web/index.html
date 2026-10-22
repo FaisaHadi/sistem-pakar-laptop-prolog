@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101211" />
+    <meta name="description" content="Gamaban membantu menelusuri dugaan awal gangguan laptop dengan sistem pakar Prolog." />
+    <title>Gamaban — Diagnosa Laptop</title>
+    <link rel="icon" href="/assets/gamaban-logo.png" type="image/png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Gamaban beranda">
+          <img src="/assets/gamaban-logo.png" alt="" />
+          <span>gamaban<span class="brand-dot">.</span></span>
+        </a>
+        <div class="topbar-meta">
+          <span class="live-dot"></span>
+          <span>Sistem pakar berbasis Prolog</span>
+        </div>
+        <a class="topbar-link" href="#cara-kerja">Cara kerja <span aria-hidden="true">↗</span></a>
+      </header>
+
+      <main>
+        <section class="hero-grid" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="eyebrow-star">✳</span> TEMUKAN ARAH PERMASALAHAN</p>
+            <h1 id="hero-title">Kenali gejalanya.<br /><em>Pahami kemungkinan.</em></h1>
+            <p class="hero-description">Jawab beberapa pertanyaan berdasarkan hal yang sudah Anda amati. Gamaban akan menelusuri aturan untuk menampilkan dugaan awal.</p>
+            <div class="hero-footnote"><span class="footnote-icon">i</span> Tidak perlu membongkar atau menguji laptop.</div>
+          </div>
+          <aside class="hero-card" aria-label="Ringkasan konsultasi">
+            <div class="hero-card-top"><span>YOUR SESSION</span><span class="sparkle">✳</span></div>
+            <div class="hero-card-number" id="hero-count">15</div>
+            <div class="hero-card-label">gejala untuk ditelusuri</div>
+            <div class="hero-card-divider"></div>
+            <div class="hero-card-bottom"><span class="tiny-check">✓</span> Jawaban Anda tidak dinilai benar atau salah.</div>
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          </aside>
+        </section>
+
+        <section class="workspace" aria-label="Konsultasi diagnosis">
+          <div class="consultation-column">
+            <div class="section-heading">
+              <div><p class="eyebrow muted">01 / KONSULTASI</p><h2>Mulai dari yang Anda tahu</h2></div>
+              <span class="session-badge"><span class="live-dot"></span> SESI BARU</span>
+            </div>
+
+            <article class="question-card" id="question-card" aria-live="polite">
+              <div class="question-card-head">
+                <span class="step-label" id="step-label">MEMUAT KONSULTASI</span>
+                <button class="help-button" id="help-toggle" type="button" aria-expanded="false" aria-controls="question-help">Butuh konteks? <span>＋</span></button>
+              </div>
+              <div class="progress-track" role="progressbar" aria-label="Progres konsultasi" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0" id="progress-track"><span id="progress-fill"></span></div>
+              <div id="question-body" class="question-body"><div class="loading-mark"><span></span><span></span><span></span></div><p>Menyiapkan pertanyaan...</p></div>
+              <div class="question-help" id="question-help" hidden></div>
+              <div class="answer-list" id="answer-list" role="group" aria-label="Pilih jawaban"></div>
+              <div class="question-actions">
+                <button class="back-button" id="back-button" type="button" disabled><span aria-hidden="true">←</span> Kembali</button>
+                <span class="keyboard-hint">Pilih jawaban untuk lanjut</span>
+                <button class="continue-button" id="continue-button" type="button" disabled>Lanjut <span aria-hidden="true">→</span></button>
+              </div>
+            </article>
+
+            <div class="result-area" id="result-area" hidden></div>
+          </div>
+
+          <aside class="side-column">
+            <article class="progress-card">
+              <div class="side-card-head"><span>PROGRES</span><span class="side-card-icon">↗</span></div>
+              <div class="progress-number"><span id="answered-count">0</span><small> / <span id="question-total">15</span></small></div>
+              <p>gejala sudah dijawab</p>
+              <div class="mini-progress"><span id="mini-progress-fill"></span></div>
+              <div class="progress-caption"><span>Perjalanan konsultasi</span><span id="progress-percent">0%</span></div>
+            </article>
+
+            <article class="tip-card">
+              <div class="tip-icon">✳</div>
+              <p class="tip-label">CATATAN KECIL</p>
+              <h3>“Tidak tahu” juga jawaban yang valid.</h3>
+              <p class="tip-copy">Pilih itu kalau belum punya hasil pemeriksaan atau masih ragu. Jangan menebak.</p>
+            </article>
+
+            <article class="logic-card" id="cara-kerja">
+              <div class="logic-symbol">{ }</div>
+              <div><p class="tip-label">DI BALIK LAYAR</p><h3>Logika, bukan tebakan.</h3></div>
+              <p class="logic-copy">Prolog mencocokkan jawaban Anda dengan fakta dan aturan yang tersimpan.</p>
+              <div class="logic-tags"><span>FAKTA</span><span>ATURAN</span><span>INFERENSI</span></div>
+            </article>
+          </aside>
+        </section>
+
+        <footer class="app-footer">
+          <span>gamaban<span class="brand-dot">.</span> <span class="footer-separator">/</span> AI with Prolog</span>
+          <span>Pengetahuan saat ini masih draf dan perlu validasi teknisi.</span>
+        </footer>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
