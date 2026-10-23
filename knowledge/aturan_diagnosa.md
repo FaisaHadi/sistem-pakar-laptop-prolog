@@ -1,6 +1,6 @@
 # Aturan diagnosis awal
 
-Usulan **5 gangguan, 2 indikasi antara, dan 11 aturan**. R01 dan R05 menghasilkan indikasi antara; sembilan aturan lainnya menghasilkan dugaan gangguan. Seluruhnya berstatus **DRAF / PERLU_VALIDASI_TEKNISI**. Kaitan dengan sumber adalah dukungan sebagian terhadap gejala/pemeriksaan, bukan pernyataan bahwa produsen menerbitkan kombinasi aturan ini.
+Usulan **5 gangguan, 2 indikasi antara, dan 14 aturan**. R01 dan R05 menghasilkan indikasi antara; dua belas aturan lainnya menghasilkan dugaan gangguan. Seluruhnya berstatus **DRAF / PERLU_VALIDASI_TEKNISI**. Kaitan dengan sumber adalah dukungan sebagian terhadap gejala/pemeriksaan, bukan pernyataan bahwa produsen menerbitkan kombinasi aturan ini.
 
 Gunakan [definisi gejala](daftar_gejala.md) dan [daftar sumber](../docs/referensi.md) saat meninjau aturan. Semua premis dalam tabel harus bernilai `ya`. Dua aturan dengan kesimpulan sama merupakan jalur alternatif (OR antaraturan), sedangkan AND berlaku di dalam satu aturan.
 
@@ -35,11 +35,14 @@ Indikasi hanya merangkum bukti untuk pembuktian bertingkat. I01 dan I02 tidak di
 | R06 | I02 | D03 | B02; perlu validasi kecukupan pola G07 dan G08 untuk dugaan awal. |
 | R07 | G07 AND G09 | D03 | B02; perlu manual interpretasi hasil diagnostik termal/kipas model sasaran. |
 | R08 | G10 AND G11 | D04 | B03; wajib pemetaan kode ke manual model, tidak ada angka beep universal. |
-| R09 | G12 | D04 | B06; perlu sumber khusus tes memori dan validasi penafsiran hasil gagal. Satu hasil tes yang spesifik dipakai sebagai jalur tersendiri. |
+| R09 | G12 | D04 | B06, B07 (Memory), B08 (Memory Tests); interpretasi hasil gagal tetap perlu validasi model/pakar. Satu hasil tes yang spesifik dipakai sebagai jalur tersendiri. |
 | R10 | G13 AND G14 | D05 | B04; perlu validasi pembeda gangguan sambungan, konfigurasi, dan media. |
-| R11 | G14 AND G15 | D05 | B04, B06; perlu manual hasil diagnostik dan pemeriksaan alternatif konfigurasi boot. |
+| R11 | G14 AND G15 | D05 | B04, B06, B07, B08; jalur gabungan keluhan boot dan hasil tes. |
+| R12 | G05 | D02 | B05 dan B08; laporan kesehatan baterai yang secara tegas buruk/perlu diganti menjadi bukti langsung. |
+| R13 | G09 | D03 | B02, B07 (Fan dan status hasil), B08 (Fan Tests); kegagalan tes kipas/pendinginan menjadi bukti langsung. |
+| R14 | G15 | D05 | B04, B07 (Storage dan status hasil), B08 (Storage Tests); kegagalan tes penyimpanan menjadi bukti langsung. |
 
-Aturan sengaja konservatif untuk demo awal. Misalnya G14 saja tidak menghasilkan D05, G06 saja tidak menghasilkan D02, dan I01 saja tidak menghasilkan D01. Aturan dapat gagal menangkap gangguan yang nyata jika buktinya belum tersedia; sistem harus menyebut keterbatasan tersebut.
+Aturan sengaja konservatif untuk demo awal. Misalnya G14 saja tidak menghasilkan D05, G06 saja tidak menghasilkan D02, dan I01 saja tidak menghasilkan D01. R12–R14 memperbaiki keadaan sebelumnya saat G05/G09/G15 positif belum mendukung dugaan tanpa gejala tambahan. Hanya hasil yang spesifik pada subsistem dihitung; warning belum konklusif, canceled, not applicable, dan hasil belum selesai diperlakukan sebagai tidak_tahu. Aturan tetap dapat gagal menangkap gangguan nyata bila bukti belum tersedia.
 
 R01–R02 dan R05–R06 memberi contoh pembuktian bertingkat. Tidak ada siklus: indikasi hanya bergantung pada gejala, dan diagnosis hanya bergantung pada indikasi/gejala. Semua G01–G15 digunakan setidaknya sekali.
 
@@ -47,7 +50,7 @@ R01–R02 dan R05–R06 memberi contoh pembuktian bertingkat. Tidak ada siklus: 
 
 Nama gangguan, label indikasi, dan saran di dokumen ini sama dengan teks di `src/knowledge.pl`. Tabel premis/kesimpulan serta status draf tetap. Catatan sumber dan batas interpretasi berikut ditujukan untuk peninjau teknis.
 
-Alasan diambil dari cabang aturan yang berhasil, bukan teks diagnosis yang mencantumkan semua gejala kelompok tersebut. Contoh: D02 melalui R04 menyebut G05 dan G06, tidak menambahkan G04 bila gejala itu tidak dijawab ya. Jika R03 dan R04 sama-sama berhasil, gabungkan dua jalur dan bukti uniknya.
+Alasan diambil dari cabang aturan yang berhasil, bukan teks diagnosis yang mencantumkan semua gejala kelompok tersebut. Contoh: D02 melalui R04 menyebut G05 dan G06, tidak menambahkan G04 bila gejala itu tidak dijawab ya. Jika beberapa jalur berhasil, tampilkan semua jalur dan bukti uniknya tanpa menambah kepastian. R03/R04, R07, dan R11 merupakan penguatan konteks yang sebagian tercakup jalur langsung R12–R14. Jalur-jalur tersebut tidak dianggap bukti independen atau diagnosis terpisah.
 
 | ID saran | Untuk | Saran yang ditampilkan kepada pengguna | Status dan sumber awal |
 | --- | --- | --- | --- |
@@ -59,6 +62,14 @@ Alasan diambil dari cabang aturan yang berhasil, bukan teks diagnosis yang menca
 
 Saran awal dibatasi pada pengamatan, pencatatan bukti, dan rujukan. Aplikasi tidak mengarahkan pengguna membongkar baterai internal, memindahkan RAM, mengubah pengaturan boot, atau memperbarui BIOS sebagai tindakan otomatis berdasarkan aturan draf.
 
+## Validator dan penjelasan
+
+`src/knowledge_check.pl` memeriksa keunikan ID, referensi premis/kesimpulan, siklus, metadata/sumber, batas kesimpulan, saran, serta gejala yang tidak digunakan sebelum sesi/server dimulai. `src/knowledge_meta.pl` menyimpan URL, tanggal akses, merek sumber, dan batas setiap aturan. CLI dan web menampilkan penjelasan dari data yang sama.
+
+Cakupan lintas merek bersyarat: tidak semua alat, tombol BIOS, dan kode berlaku pada seluruh model. R01/R02 dan R08 masih memiliki rujukan awal khusus Dell; pada merek lain pertanyaan hanya dijawab ya bila bukti model memang sesuai. Jika belum diketahui, pilih tidak_tahu.
+
 ## Agenda validasi pengetahuan
 
-Untuk setiap R01–R11 dan S01–S05, catat sumber/manual beserta bagian relevan, identitas atau peran peninjau yang benar-benar terlibat, tanggal peninjauan, contoh kasus, alternatif penyebab, serta keputusan terima/revisi/tolak. Saat ini belum ada wawancara pakar atau pengujian perangkat nyata. Jangan mengubah status menjadi tervalidasi hanya karena skenario logikanya konsisten.
+Untuk setiap R01–R14 dan S01–S05, catat sumber/manual beserta bagian relevan, identitas atau peran peninjau yang benar-benar terlibat, tanggal peninjauan, contoh kasus, alternatif penyebab, serta keputusan terima/revisi/tolak. Saat ini belum ada wawancara pakar atau pengujian perangkat nyata. Jangan mengubah status menjadi tervalidasi hanya karena skenario logikanya konsisten.
+
+Lembar keputusan dan prosedur kasus tersedia di [validasi_pakar.md](validasi_pakar.md). Dataset nyata sengaja kosong; pembanding Prolog tidak menghasilkan angka akurasi sebelum label peninjau tersedia.

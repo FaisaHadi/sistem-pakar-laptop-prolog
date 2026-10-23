@@ -43,8 +43,8 @@ teks_hasil(Hasil, Teks) :-
 jumlah_teks(Teks, Potongan, N) :-
     findall(Pos, sub_string(Teks, Pos, _, _, Potongan), Posisi), length(Posisi, N).
 
-input_d01("ya\nya\nya\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\n").
-input_tidak("tidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\n").
+input_d01("ya\nya\nya\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\n").
+input_tidak("tidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\n").
 
 :- begin_tests(prototipe_laptop).
 
@@ -92,20 +92,20 @@ test(t13) :- cek_dugaan([g06,g14], [], [], _).
 test(t14) :-
     cek_dugaan([g04,g05,g06], [], [d02], H),
     findall(Rs-Gs, cek_jalur(H, d02, Rs, Gs), Jalur),
-    assertion(Jalur == [[r03]-[g04,g05], [r04]-[g05,g06]]).
+    assertion(Jalur == [[r03]-[g04,g05], [r04]-[g05,g06], [r12]-[g05]]).
 test(t15) :-
     cek_dugaan([g07,g08,g09], [], [d03], H),
     findall(Rs-Gs, cek_jalur(H, d03, Rs, Gs), Jalur),
-    assertion(Jalur == [[r06,r05]-[g07,g08], [r07]-[g07,g09]]).
+    assertion(Jalur == [[r06,r05]-[g07,g08], [r07]-[g07,g09], [r13]-[g09]]).
 test(t16) :-
     cek_dugaan([g07,g08,g12], [], [d03,d04], H),
     once(cek_jalur(H, d03, [r06,r05], [g07,g08])),
     once(cek_jalur(H, d04, [r09], [g12])).
 test(t17) :-
-    cek_dugaan([g08,g09], [], [], _),
-    evaluasi(d03, tersimpan, hasil(d03, tidak_terpenuhi, Jalur, [])),
+    cek_dugaan([g08,g09], [], [d03], _),
+    evaluasi(d03, tersimpan, hasil(d03, didukung, Jalur, [])),
     assertion(Jalur = [jalur(r06,tidak_terpenuhi,_,[]),
-                      jalur(r07,tidak_terpenuhi,_,[])]).
+                      jalur(r07,tidak_terpenuhi,_,[]),jalur(r13,didukung,_,[])]).
 test(t18) :-
     mulai_sesi,
     atomics_to_string([tidak_tahu,tidak_tahu,tidak_tahu,tidak_tahu,tidak_tahu,
@@ -152,7 +152,7 @@ test(t23_urutan_dan_seluruh_hipotesis) :-
     input_d01(Input),
     dengan_input(Input, jalankan_konsultasi(selesai(H)), _),
     findall(G, jawaban(G,_), Urutan),
-    assertion(Urutan == [g01,g02,g03,g04,g05,g07,g10,g12,g13,g14]),
+    assertion(Urutan == [g01,g02,g03,g04,g05,g07,g09,g10,g12,g13,g14,g15]),
     findall(D, member(hasil(D,_,_,_), H), [d01,d02,d03,d04,d05]).
 test(t24_eof) :-
     dengan_input("", jalankan_konsultasi(belum_selesai(g01,H)), Teks),
@@ -166,7 +166,7 @@ test(t24_eof) :-
 test(t25) :-
     cek_dugaan([g05,g06], [], [d02], H),
     memberchk(hasil(d02,didukung,[jalur(r03,tidak_terpenuhi,_,_),
-                                jalur(r04,didukung,_,_)],[]), H).
+                                jalur(r04,didukung,_,_),jalur(r12,didukung,_,[])],[]), H).
 test(t26) :-
     cek_dugaan([g02,g03], [g01], [], _),
     evaluasi(d01, tersimpan,
@@ -183,22 +183,22 @@ test(t27) :-
 test(t28) :-
     cek_dugaan([g05,g06], [g04], [d02], H),
     memberchk(hasil(d02,didukung,[jalur(r03,belum_lengkap,_,[kurang(g04,tidak_tahu)]),
-                                jalur(r04,didukung,_,[])],[]), H),
+                                jalur(r04,didukung,_,[]),jalur(r12,didukung,_,[])],[]), H),
     once(cek_jalur(H,d02,[r04],[g05,g06])).
 test(t29) :-
     cek_dugaan([g13,g14,g15], [], [d05], H),
     findall(Rs-Gs, cek_jalur(H,d05,Rs,Gs), Jalur),
-    assertion(Jalur == [[r10]-[g13,g14], [r11]-[g14,g15]]),
+    assertion(Jalur == [[r10]-[g13,g14], [r11]-[g14,g15], [r14]-[g15]]),
     teks_hasil(H, Teks), jumlah_teks(Teks,'D05 - ',1),
     jumlah_teks(Teks,'Saran S05',1),
     jumlah_teks(Teks,'Jalur R10: Gejala sesuai dengan aturan dugaan ini',1),
     jumlah_teks(Teks,'Jalur R11: Gejala sesuai dengan aturan dugaan ini',1).
 test(t30) :-
-    cek_dugaan([g15], [], [], H),
-    memberchk(hasil(d05,tidak_terpenuhi,_,[]),H),
+    cek_dugaan([g15], [], [d05], H),
+    memberchk(hasil(d05,didukung,_,[]),H),
     teks_hasil(H,Teks),
     assertion(sub_string(Teks,_,_,_,'tidak berarti laptop Anda pasti sehat')),
-    assertion(\+ sub_string(Teks,_,_,_,'Saran S05')).
+    assertion(sub_string(Teks,_,_,_,'Saran S05')).
 
 test(belum_ditanya_berbeda_dari_tidak_tahu) :-
     mulai_sesi,
@@ -232,17 +232,18 @@ test(t27_interaktif_tidak_berhenti_pada_unknown) :-
 test(jejak_diperbarui_sesudah_alternatif) :-
     mulai_sesi,
     dengan_input("tidak\nya\nya\n",
-                 jalankan_evaluasi(d02,hasil(d02,didukung,[J1,J2],[])), _),
+                 jalankan_evaluasi(d02,hasil(d02,didukung,[J1,J2,J3],[])), _),
     J1 = jalur(r03,tidak_terpenuhi,
                [gejala(g04,tidak,tidak_terpenuhi),gejala(g05,ya,didukung)],[]),
-    J2 = jalur(r04,didukung,_,[]).
+    J2 = jalur(r04,didukung,_,[]), J3 = jalur(r12,didukung,_,[]).
 test(alternatif_tetap_ditanya_setelah_berhasil) :-
     mulai_sesi,
     dengan_input("ya\nya\ntidak_tahu\n",
                  jalankan_evaluasi(d02,hasil(d02,didukung,Jalur,[])), _),
     assertion(jawaban(g06,tidak_tahu)),
     assertion(Jalur = [jalur(r03,didukung,_,[]),
-                      jalur(r04,belum_lengkap,_,[kurang(g06,tidak_tahu)])]).
+                      jalur(r04,belum_lengkap,_,[kurang(g06,tidak_tahu)]),
+                      jalur(r12,didukung,_,[]) ]).
 test(tersimpan_tidak_mengisi_jawaban) :-
     mulai_sesi, evaluasi_semua(tersimpan,H), length(H,5),
     assertion(\+ jawaban(_,_)), assertion(\+ hasil_sesi(_)).
@@ -274,7 +275,7 @@ test(id_dan_pengetahuan_tetap_draf) :-
     findall(G,gejala(G,_,_,_),Gs),
     assertion(Gs == [g01,g02,g03,g04,g05,g06,g07,g08,g09,g10,g11,g12,g13,g14,g15]),
     findall(D,gangguan(D,_),[d01,d02,d03,d04,d05]),
-    findall(R,aturan(R,_,_),[r01,r02,r03,r04,r05,r06,r07,r08,r09,r10,r11]),
+    findall(R,aturan(R,_,_),[r01,r02,r03,r04,r05,r06,r07,r08,r09,r10,r11,r12,r13,r14]),
     findall(I,indikasi(I,_),[i01,i02]),
     assertion(status_pengetahuan(draf)),
     forall(aturan(R,_,_), assertion(aturan_info(R,_,draf))).
@@ -285,7 +286,7 @@ test(semua_hasil_punya_alasan_dan_saran) :-
            (assertion(saran(D,_,_)),
             forall(member(J,Jalur),
                    (ringkas_jalur(J,_,Pos,[],[]), assertion(Pos \== []))))),
-    jumlah_teks(Teks,'Saran S',5), jumlah_teks(Teks,'Alasan berdasarkan jawaban ya:',9),
+    jumlah_teks(Teks,'Saran S',5), jumlah_teks(Teks,'Alasan berdasarkan jawaban ya:',12),
     assertion(\+ sub_string(Teks,_,_,_,'%')).
 
 test(bahasa_d01_ya_dan_petunjuk) :-
@@ -307,7 +308,7 @@ test(bahasa_d01_ya_dan_petunjuk) :-
     jumlah_teks(Teks,'Saran S01',1).
 
 test(bahasa_d01_g03_tidak_tahu) :-
-    Input = "ya\nya\ntidak_tahu\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\n",
+    Input = "ya\nya\ntidak_tahu\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\ntidak\n",
     dengan_input(Input,jalankan_konsultasi(selesai(H)),Teks),
     memberchk(hasil(d01,belum_lengkap,[J],[kurang(g03,tidak_tahu)]),H),
     ringkas_jalur(J,[r02,r01],[g01,g02],[kurang(g03,tidak_tahu)],[]),

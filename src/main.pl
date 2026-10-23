@@ -4,9 +4,12 @@
             mulai_sesi/0, simpan_jawaban/2, jawaban/2,
             status_gejala/2, status_sesi/1, hasil_sesi/1,
             evaluasi/3, evaluasi_semua/2, ringkas_jalur/5,
+            langkah_konsultasi/1,
             tampilkan_hasil/2 ]).
 
 :- use_module(knowledge).
+:- use_module(knowledge_check).
+:- use_module(explanation).
 :- use_module(library(readutil)).
 :- use_module(library(error)).
 :- use_module(library(lists)).
@@ -20,6 +23,7 @@
 */
 
 mulai_sesi :-
+    periksa_pengetahuan,
     retractall(jawaban(_, _)),
     retractall(hasil_sesi(_)),
     retractall(status_sesi(_)),
@@ -50,6 +54,7 @@ status_gejala(G, Keadaan) :-
     ( jawaban(G, J) -> Keadaan = J ; Keadaan = belum_ditanya ).
 
 mode_valid(tersimpan).
+mode_valid(langkah).
 mode_valid(tanya(In, Out)) :- must_be(stream, In), must_be(stream, Out).
 
 periksa_mode(Mode) :-
@@ -65,12 +70,14 @@ tujuan_valid(G) :-
     ).
 
 evaluasi(Tujuan, Mode, Hasil) :-
+    periksa_pengetahuan,
     tujuan_valid(Tujuan), periksa_mode(Mode),
     ( Mode == tersimpan -> buktikan(Tujuan, tersimpan, Hasil)
-    ; buktikan(Tujuan, Mode, _), buktikan(Tujuan, tersimpan, Hasil)
+    ; buktikan_dengan(Mode, Tujuan, _), buktikan(Tujuan, tersimpan, Hasil)
     ).
 
 evaluasi_semua(Mode, Hasil) :-
+    periksa_pengetahuan,
     periksa_mode(Mode),
     findall(D, gangguan(D, _), Ds),
     ( Mode == tersimpan -> true ; maplist(buktikan_dengan(Mode), Ds, _) ),
@@ -78,6 +85,15 @@ evaluasi_semua(Mode, Hasil) :-
     % Bangun ulang seluruh jejak dari fakta sesi, tanpa I/O tambahan.
     maplist(buktikan_dengan(tersimpan), Ds, Hasil).
 
+% Mode langkah memakai penelusuran yang sama dengan terminal, tanpa I/O.
+% Berhenti pada fakta pertama yang diperlukan dan belum memiliki jawaban.
+langkah_konsultasi(Langkah) :-
+    catch((evaluasi_semua(langkah, Hasil), Langkah = selesai(Hasil)),
+          butuh_jawaban(G, Tujuan, Aturan),
+          Langkah = pertanyaan(G, Tujuan, Aturan)).
+
+buktikan_dengan(langkah, Tujuan, Hasil) :-
+    !, buktikan(Tujuan, langkah(Tujuan, []), Hasil).
 buktikan_dengan(Mode, Tujuan, Hasil) :- buktikan(Tujuan, Mode, Hasil).
 
 buktikan(G, Mode, Hasil) :-
@@ -92,9 +108,14 @@ buktikan(G, Mode, Hasil) :-
     ).
 
 buktikan_aturan(Mode, def(R, Premis), jalur(R, Status, Jejak, Kurang)) :-
-    buktikan_premis(Premis, Mode, Jejak),
+    mode_aturan(Mode, R, ModePremis),
+    buktikan_premis(Premis, ModePremis, Jejak),
     maplist(status_bukti, Jejak, StatusPremis), status_and(StatusPremis, Status),
     findall(K, (member(B, Jejak), bukti_kurang(B, K)), Ks), sort(Ks, Kurang).
+
+mode_aturan(langkah(Tujuan, Aturan), R, langkah(Tujuan, Berikut)) :-
+    !, append(Aturan, [R], Berikut).
+mode_aturan(Mode, _, Mode).
 
 buktikan_premis([], _, []).
 buktikan_premis([P|Ps], Mode, [B|Bs]) :-
@@ -139,6 +160,10 @@ bukti_kurang(hasil(_, _, Jalur, _), K) :-
 ambil_jawaban(G, Mode, J) :-
     ( jawaban(G, Tersimpan) -> J = Tersimpan
     ; Mode == tersimpan -> J = belum_ditanya
+    ; Mode = langkah(Tujuan, Aturan) ->
+        ( status_sesi(aktif) -> throw(butuh_jawaban(G, Tujuan, Aturan))
+        ; permission_error(read, sesi_tidak_aktif, G)
+        )
     ; Mode = tanya(In, Out),
       ( status_sesi(aktif) -> true ; permission_error(read, sesi_tidak_aktif, G) ),
       tanya_gejala(G, In, Out, J), simpan_jawaban(G, J)
@@ -172,6 +197,7 @@ konsultasi(In, Out, HasilSesi) :-
     mulai_sesi,
     format(Out, '~nSISTEM PAKAR DIAGNOSA AWAL KERUSAKAN LAPTOP~n', []),
     format(Out, 'Pengetahuan: DRAF, belum divalidasi teknisi. Tanpa persentase kepastian.~n', []),
+    cakupan_pengetahuan(Cakupan), format(Out, '~w~n', [Cakupan]),
     format(Out, 'Gunakan satu kejadian gangguan pada laptop Anda. Jawab dari pengamatan atau hasil pemeriksaan yang sudah Anda miliki.~n', []),
     format(Out, 'ya: kondisi sesuai dengan pengamatan atau hasil pemeriksaan Anda.~n', []),
     format(Out, 'tidak: Anda sudah menilai kondisi tersebut dan hasilnya tidak sesuai.~n', []),
@@ -222,6 +248,10 @@ tampilkan_diagnosa(Out, hasil(D, Status, Jalur, Kurang)) :-
     gangguan(D, Nama), upcase_atom(D, ID),
     teks_status(Status, StatusTampil),
     format(Out, '~n~w - ~w: ~w~n', [ID, Nama, StatusTampil]),
+    gangguan_batas(D,Batas), format(Out,'Batas kesimpulan: ~w~n',[Batas]),
+    ( Jalur = [_,_|_] ->
+        format(Out,'Jalur bersifat alternatif (OR). Beberapa jalur sesuai tidak menambah persentase kepastian.~n',[])
+    ; true ),
     maplist(tampilkan_jalur(Out), Jalur),
     ( Status == didukung ->
         saran(D, S, Teks), upcase_atom(S, SID),
@@ -237,6 +267,7 @@ tampilkan_jalur(Out, J) :-
     maplist(upcase_atom, Aturan, IDs), atomic_list_concat(IDs, ' -> ', Teks),
     teks_status(Status, StatusTampil),
     format(Out, '  Jalur ~w: ~w~n', [Teks, StatusTampil]),
+    maplist(tampilkan_sumber_aturan(Out),Aturan),
     ( Status == didukung ->
         format(Out, '  Alasan berdasarkan jawaban ya:~n', []),
         maplist(tampilkan_gejala(Out), Positif)
@@ -250,6 +281,15 @@ tampilkan_jalur(Out, J) :-
     ; format(Out, '  Informasi yang belum tersedia pada jalur ini: ', []),
       tampilkan_kurang(Out, Kurang)
     ).
+
+tampilkan_sumber_aturan(Out,R) :-
+    penjelasan_aturan(R,Data),
+    findall(I,(member(P,Data.premises),I=P.id),Premis),
+    atomic_list_concat(Premis,' AND ',IF),
+    format(Out,'  ~w: IF ~w THEN ~w (DRAF).~n',[Data.id,IF,Data.conclusion.id]),
+    format(Out,'  Batas aturan: ~w~n',[Data.limits]),
+    forall(member(S,Data.sources),
+           format(Out,'  Sumber ~w: ~w (~w), diakses ~w.~n',[S.id,S.title,S.url,S.accessed])).
 
 tampilkan_gejala(Out, G) :-
     gejala(G, Label, _, _), upcase_atom(G, ID),

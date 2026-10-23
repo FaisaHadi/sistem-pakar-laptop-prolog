@@ -9,6 +9,10 @@
 !/src/
 !/src/main.pl
 !/src/knowledge.pl
+!/src/knowledge_meta.pl
+!/src/knowledge_check.pl
+!/src/explanation.pl
+!/src/domain_validation.pl
 !/src/web_app.pl
 
 !/web/
@@ -21,12 +25,16 @@
 
 !/tests/
 !/tests/main_tests.pl
+!/tests/web_tests.pl
+!/tests/knowledge_tests.pl
 !/tests/skenario_pengujian.md
 !/tests/hasil_pengujian.md
 
 !/knowledge/
 !/knowledge/daftar_gejala.md
 !/knowledge/aturan_diagnosa.md
+!/knowledge/validasi_pakar.md
+!/knowledge/kasus_validasi.json
 
 !/docs/
 !/docs/rancangan_awal.md
