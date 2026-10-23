@@ -19,7 +19,7 @@ Repository tim adalah [FaisaHadi/sistem-pakar-laptop-prolog](https://github.com/
 4. Periksa perbedaan dengan `git diff`. Bila kode, pengetahuan, atau teks yang diuji berubah, jalankan tes:
 
    ```powershell
-   swipl -q -s tests/main_tests.pl -g run_tests -t halt
+   swipl -q -s tests/main_tests.pl -s tests/web_tests.pl -s tests/knowledge_tests.pl -g run_tests -t halt
    $LASTEXITCODE
    ```
 
@@ -37,7 +37,7 @@ Repository tim adalah [FaisaHadi/sistem-pakar-laptop-prolog](https://github.com/
 
 ## Hal yang harus dijaga
 
-- Pertahankan ID G01–G15, D01–D05, I01–I02, R01–R11, dan S01–S05 pada revisi bahasa.
+- Pertahankan ID G01–G15, D01–D05, I01–I02, R01–R14, dan S01–S05 pada revisi bahasa.
 - Sinkronkan pertanyaan/bantuan dengan `knowledge/daftar_gejala.md` dan `src/knowledge.pl`; sinkronkan aturan/nama hasil/saran dengan `knowledge/aturan_diagnosa.md`.
 - Perubahan makna gejala atau premis aturan harus dijelaskan dan ditinjau tim, beserta sumber dan perubahan skenario uji.
 - Jangan menyamakan `tidak_tahu`, `belum_ditanya`, dan sesi terputus. Jangan menghapus pemeriksaan perilaku dalam tes hanya agar tes lulus.
@@ -51,3 +51,5 @@ Repository tim adalah [FaisaHadi/sistem-pakar-laptop-prolog](https://github.com/
 Jelaskan tujuan dan batas perubahan. Minta Codex membaca aturan proyek yang berlaku, kode dan dokumentasi terkait, serta melaporkan hasil tes yang benar-benar dijalankan. Jangan menaruh token atau password di prompt atau berkas. Hindari dua anggota mengubah file yang sama secara bersamaan tanpa koordinasi.
 
 Nama anggota, penanggung jawab bagian, jadwal, dan aturan merge final ditentukan oleh tim; dokumen ini tidak menetapkannya sepihak.
+
+Perubahan pengetahuan harus lolos `src/knowledge_check.pl` dan suite `tests/knowledge_tests.pl`. Aturan baru memerlukan sumber dan batas interpretasi di `src/knowledge_meta.pl`. Ikuti `knowledge/validasi_pakar.md`; contoh sintetis tidak dimasukkan sebagai kasus nyata.

@@ -8,7 +8,7 @@ Urutan materi yang diusulkan:
 2. Cara unduh/instalasi SWI-Prolog serta pengecekan terminal. Pada komputer persiapan SWI-Prolog sudah tersedia; jangan mengklaim instalasi ulang telah dilakukan.
 3. Lingkungan kerja: terminal, editor berkas `.pl`, pemuatan berkas dan query.
 4. Deskripsi kasus dan batas cakupan D01–D05.
-5. Solusi: fakta, G01–G15, aturan R01–R11, serta status validasi sumber.
+5. Solusi: fakta, G01–G15, aturan R01–R14, serta status validasi sumber.
 6. Contoh backward chaining D01 melalui R02 dan R01.
 7. Rencana demo dan skenario uji, termasuk bukti tidak lengkap serta hasil ganda.
 8. Keterbatasan dan referensi yang benar-benar digunakan.

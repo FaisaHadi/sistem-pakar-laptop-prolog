@@ -1,8 +1,10 @@
 # Sistem Pakar Diagnosa Awal Kerusakan Laptop
 
-Proyek tugas besar kelompok mata kuliah Kecerdasan Buatan. Aplikasi terminal menggunakan **SWI-Prolog**, fakta dan aturan, serta **backward chaining** untuk mencocokkan jawaban pengguna dengan dugaan gangguan laptop. Hasil memuat status, jalur aturan, alasan, informasi yang kurang, dan saran untuk dugaan yang didukung.
+Proyek tugas besar kelompok mata kuliah Kecerdasan Buatan. Aplikasi terminal dan web lokal menggunakan **SWI-Prolog**, fakta dan aturan, serta **backward chaining** untuk mencocokkan jawaban pengguna dengan dugaan gangguan laptop. Hasil memuat status, jalur aturan, alasan, informasi yang kurang, dan saran untuk dugaan yang didukung.
 
 **Status per 22 Oktober 2026: prototipe terminal sudah diimplementasikan dan bahasa konsultasi sudah direvisi. Seluruh pengetahuan masih DRAF, belum divalidasi teknisi atau diuji sebagai diagnosis pada perangkat nyata.** Hasil program bukan diagnosis final dan tidak memakai persentase kepastian.
+
+**Pembaruan 23 Oktober 2026:** web Gamaban kini menanyakan gejala sesuai penelusuran Prolog, selalu menampilkan panduan jawaban, mendukung koreksi dengan penghitungan ulang jalur, dan merangkum hasil dengan detail yang dapat dibuka. Validasi API dan konsultasi adaptif memiliki tes HTTP tersendiri. Penyempurnaan sistem pakar menambah R12–R14 untuk bukti pemeriksaan langsung, konteks lintas merek, sumber/batas tiap aturan, validator pengetahuan, dan pembanding kasus teknisi.
 
 ## Untuk anggota yang baru bergabung
 
@@ -17,16 +19,16 @@ Proyek tugas besar kelompok mata kuliah Kecerdasan Buatan. Aplikasi terminal men
 | Bagian | Kondisi |
 | --- | --- |
 | Aplikasi | Konsultasi CLI asli dan antarmuka web lokal Gamaban di folder clone ini |
-| Basis pengetahuan | 15 gejala G01–G15, 5 gangguan D01–D05, 2 indikasi I01–I02, 11 aturan R01–R11, 5 saran S01–S05 |
+| Basis pengetahuan | 15 gejala G01–G15, 5 gangguan D01–D05, 2 indikasi I01–I02, 14 aturan R01–R14, 5 saran S01–S05 |
 | Penalaran | Backward chaining; memeriksa aturan alternatif dan mempertahankan jalur bukti |
 | Jawaban | `ya`, `tidak`, `tidak_tahu`; disimpan dalam memori selama satu sesi |
 | Sesi | Input invalid ditanya ulang, jawaban digunakan kembali, sesi baru mereset data, EOF saat pertanyaan menandai sesi terputus |
 | Bahasa | Pertanyaan dan bantuan pengguna disinkronkan dengan dokumentasi; catatan teknis dipisahkan |
-| Pengujian | Dijalankan ulang saat persiapan Git pada 22 Oktober 2026: 48/48 lulus, exit code 0, SWI-Prolog 10.0.2 for x64-win64 |
-| Validasi pengetahuan | Belum dilakukan oleh teknisi; sumber khusus model laptop masih perlu dilengkapi |
+| Pengujian | 23 Oktober 2026: 131/131 lulus (48 mesin/CLI, 42 HTTP/API, 4 siklus server, 20 integritas pengetahuan, 9 penalaran/cakupan, dan 8 pembanding kasus), exit code 0, SWI-Prolog 10.0.2 for x64-win64 |
+| Validasi pengetahuan | Struktur diperiksa otomatis; rujukan umum Dell, Lenovo, dan HP tersedia. Validasi teknisi/model serta kasus nyata berlabel masih menunggu |
 | Luaran tugas | Kerangka slide dan video tersedia; laporan akhir, slide final, dan rekaman belum dinyatakan selesai. Pembagian anggota dan jadwal kalender belum ditetapkan |
 
-Angka di atas berasal dari eksekusi ulang aktual pada komputer lokal saat penyiapan dokumentasi Git. Riwayat sebelumnya dipertahankan dalam [hasil pengujian](tests/hasil_pengujian.md). Pada eksekusi ini belum ada commit, sehingga tidak ada SHA commit yang dapat dicatat. Jalankan tes lagi di komputer masing-masing; kelulusan tes tidak membuktikan ketepatan diagnosis perangkat nyata.
+Angka pengujian berasal dari eksekusi aktual pada komputer lokal. Riwayat sebelumnya dipertahankan dalam [hasil pengujian](tests/hasil_pengujian.md). Pengembangan dari dasar checkout `4537317` dikelompokkan menjadi commit basis pengetahuan/mesin inferensi, API/server, antarmuka, serta dokumentasi pada branch `alpha-v-1.0`. Jalankan tes lagi di komputer masing-masing; kelulusan tes tidak membuktikan ketepatan diagnosis perangkat nyata.
 
 ## Ketentuan dosen dan keputusan proyek
 
@@ -76,7 +78,7 @@ Jalankan dari folder yang berisi `README.md`, `src/`, dan `tests/`:
 swipl -q -s src/main.pl -g main -t halt
 
 # Seluruh pengujian
-swipl -q -s tests/main_tests.pl -g run_tests -t halt
+swipl -q -s tests/main_tests.pl -s tests/web_tests.pl -s tests/knowledge_tests.pl -g run_tests -t halt
 $LASTEXITCODE
 ```
 
@@ -86,15 +88,31 @@ Sesudah hasil muncul, ketik `baru` untuk mengosongkan data dan memulai sesi beri
 
 ## Menjalankan antarmuka Gamaban
 
-Folder ini adalah salinan UI terpisah dari versi CLI asli. Antarmuka Gamaban berjalan di browser lokal, sedangkan SWI-Prolog tetap menjalankan penalaran dan menghasilkan ringkasan.
+Antarmuka Gamaban berjalan di browser lokal, sedangkan SWI-Prolog menentukan pertanyaan berikutnya dan menghasilkan ringkasan. Versi CLI dan web menggunakan basis pengetahuan serta mesin inferensi yang sama.
 
 ```powershell
 swipl -q -s src/web_app.pl -g server -t halt
 ```
 
-Buka `http://localhost:8080` di browser. Biarkan terminal server tetap terbuka selama konsultasi; tekan `Ctrl+C` untuk menghentikannya. Antarmuka tidak memerlukan Node.js, Python, database, atau API key. Versi CLI tetap dapat dijalankan di folder ini dengan perintah CLI di atas; folder `sistem-pakar-laptop-prolog` di sebelahnya adalah salinan CLI asli yang tidak diubah.
+Buka `http://localhost:8080` di browser. Biarkan terminal server tetap terbuka selama konsultasi. Untuk menghentikannya, tekan `Ctrl+C` sekali di terminal server. Server menutup listener HTTP dan keluar tanpa menampilkan menu interupsi Prolog. Alternatifnya, ketik `stop` tanpa tanda titik lalu tekan Enter; EOF pada input terminal juga menghentikan server. Antarmuka tidak memerlukan Node.js, Python, database, atau API key. Versi CLI tetap dapat dijalankan di folder ini dengan perintah CLI di atas.
 
-Pertanyaan dan bantuan UI dibaca langsung dari basis pengetahuan Prolog. Pilih salah satu jawaban, gunakan tombol **Butuh konteks?** untuk melihat bantuan, lalu gunakan **Kembali** jika ingin meninjau jawaban sebelumnya. Setelah semua pertanyaan selesai, UI mengirim jawaban ke mesin Prolog untuk mendapatkan dugaan, jalur aturan, alasan, informasi yang belum tersedia, dan saran.
+Pilih merek dan isi model bila diketahui, lalu tekan **Mulai konsultasi**. Merek/model memberi konteks, bukan sertifikasi dukungan perangkat. Referensi khusus tersedia untuk sebagian pemeriksaan Dell, Lenovo, dan HP; merek lain tetap dapat mencocokkan pengamatan dengan aturan draf, dengan peringatan keterbatasan sumber.
+
+Pertanyaan dan bantuan UI dibaca langsung dari basis pengetahuan Prolog. Baca bagian **Sebelum menjawab**, pilih jawaban, lalu tekan **Lanjut**. Pilihan juga dapat dipilih dengan tombol angka 1, 2, atau 3. **Mengapa pertanyaan ini muncul?** menampilkan dugaan dan aturan yang sedang ditelusuri.
+
+Tidak semua 15 gejala harus ditanyakan. Premis lanjutan pada jalur yang sudah gugur dilewati; aturan alternatif dan dugaan lainnya tetap diperiksa. Skenario seluruh jawaban `tidak` selesai setelah 10 pertanyaan, sedangkan skenario demo D01 selesai setelah 12. G09 dan G15 kini tetap diperiksa karena memiliki jalur bukti langsung. Angka cakupan gejala bukan persentase kepastian atau janji jumlah pertanyaan yang masih tersisa.
+
+Gunakan **Kembali** atau **Tinjau jawaban** untuk memperbaiki jawaban. Bila jawaban sebelumnya berubah, jawaban setelahnya dihapus agar penelusuran baru tidak mewarisi bukti dari jalur lama. Hasil mendahulukan dugaan didukung dan informasi belum lengkap; detail jalur serta dugaan yang belum didukung dapat dibuka. **Mulai konsultasi baru** mengosongkan jawaban dan kembali ke formulir perangkat. **Ganti perangkat dan mulai ulang** juga menghapus jawaban agar satu sesi tidak mencampur laptop. Jawaban disimpan di memori halaman, sehingga memuat ulang halaman memulai sesi baru.
+
+Jika koneksi gagal, jawaban yang sudah dipilih tetap ada dan pesan **Coba lagi** tampil. Jangan tutup atau muat ulang halaman jika ingin mempertahankan jawaban. API membedakan input invalid (HTTP 400, JSON) dari kesalahan internal (HTTP 500, pesan umum JSON).
+
+Untuk menjalankan pengujian secara terpisah:
+
+```powershell
+swipl -q -s tests/main_tests.pl -g run_tests -t halt
+swipl -q -s tests/web_tests.pl -g run_tests -t halt
+swipl -q -s tests/knowledge_tests.pl -g run_tests -t halt
+```
 
 > Status pengetahuan tetap draf dan belum divalidasi teknisi. Hasil aplikasi adalah dugaan awal, bukan diagnosis final.
 
@@ -109,6 +127,26 @@ Pertanyaan dan bantuan UI dibaca langsung dari basis pengetahuan Prolog. Pilih s
 | D05 | Masalah pengenalan atau kondisi penyimpanan (SSD/HDD) |
 
 Sistem belum mencakup seluruh kerusakan laptop. Sebagian pertanyaan membutuhkan informasi BIOS/UEFI, panduan model, atau hasil alat pemeriksaan resmi yang sudah tersedia. Keluhan umum seperti lambat atau layar hitam tidak otomatis menjadi bukti kerusakan komponen.
+
+R12, R13, dan R14 memberi jalur bukti langsung: G05 ya mendukung D02, G09 ya mendukung D03, dan G15 ya mendukung D05. Jawaban ya harus merujuk laporan resmi yang spesifik sesuai model. Warning yang belum konklusif, tes batal/tidak tersedia/belum selesai, atau hasil yang belum dipahami berarti `tidak_tahu`. Beberapa jalur sesuai untuk dugaan yang sama tidak dihitung sebagai peningkatan persentase kepastian.
+
+## Pemeriksaan pengetahuan dan validasi teknisi
+
+Struktur basis pengetahuan diperiksa sebelum sesi atau server dimulai. Pemeriksaan manual tanpa menjalankan konsultasi:
+
+```powershell
+swipl -q -s src/knowledge_check.pl -g periksa_pengetahuan -t halt
+```
+
+ID duplikat, premis/kesimpulan tidak dikenal, siklus, metadata/sumber tidak lengkap, saran hilang, atau gejala tidak digunakan menolak pemakaian pengetahuan sampai diperbaiki. Detail sumber dan batas tersedia di `src/knowledge_meta.pl`, sedangkan penjelasan CLI/web dibentuk bersama oleh `src/explanation.pl`. `GET /api/knowledge` menyediakan metadata tersebut. API konsultasi menerima `context` opsional, contohnya `{"brand":"lenovo","model":"ThinkPad T14"}`; konteks tidak mengesahkan dukungan model.
+
+Lembar keputusan tiap aturan/saran dan prosedur pencatatan kasus ada di [validasi pakar](knowledge/validasi_pakar.md). Dataset [kasus_validasi.json](knowledge/kasus_validasi.json) sengaja kosong karena belum ada kasus nyata berlabel. Untuk membandingkan kasus setelah peninjau mengisinya:
+
+```powershell
+swipl -q -s src/domain_validation.pl -g laporan -t halt
+```
+
+Laporan tanpa kasus mengembalikan `belum_ada_kasus` dan `exact_match_rate: null`. Setelah ada kasus, hasil menunjukkan label yang sesuai, berlebih, atau terlewat. Proporsi kecocokan dataset ini bukan persentase kepastian konsultasi; status pengetahuan tidak otomatis berubah menjadi tervalidasi.
 
 ## Cara penalaran bekerja
 
@@ -169,6 +207,12 @@ Kedua sesi selesai. Jawaban `tidak_tahu` berbeda dari belum ditanyakan atau sesi
 | --- | --- |
 | `src/main.pl` | Mesin inferensi, input, sesi, dan tampilan hasil |
 | `src/knowledge.pl` | Gejala, gangguan, indikasi, aturan, sumber aturan, serta saran |
+| `src/knowledge_meta.pl` | Sumber, merek rujukan, tanggal akses, dan batas aturan/dugaan |
+| `src/knowledge_check.pl` | Validator struktur sebelum sesi/server/evaluasi |
+| `src/explanation.pl` | Pembentuk penjelasan dan konteks lintas merek |
+| `src/domain_validation.pl` | Pembanding label kasus teknisi dengan hasil program |
+| `src/web_app.pl` | Server HTTP, validasi JSON, pertanyaan adaptif, dan hasil API |
+| `web/index.html`, `web/app.js`, `web/styles.css` | Antarmuka konsultasi, navigasi jawaban, dan tampilan hasil |
 | `knowledge/daftar_gejala.md` | Pertanyaan, bantuan pengguna, definisi teknis, dan batas bukti |
 | `knowledge/aturan_diagnosa.md` | Aturan, nama hasil, saran, serta batas interpretasi |
 | `docs/rancangan_awal.md` | Rancangan dan kontrak evaluasi; harus mengikuti implementasi terbaru |
@@ -176,6 +220,9 @@ Kedua sesi selesai. Jawaban `tidak_tahu` berbeda dari belum ditanyakan atau sesi
 | `CONTRIBUTING.md`, `docs/panduan_git.md` | Alur branch, review, pemeriksaan indeks, dan publikasi oleh pemilik |
 | `docs/persiapan_github.md` | Pemeriksaan aktual Git, daftar berkas yang dibagikan/dikecualikan, dan langkah yang masih tertunda |
 | `tests/main_tests.pl` | Tes otomatis |
+| `tests/web_tests.pl` | Tes HTTP/API, validasi input, isolasi permintaan, dan konsultasi adaptif |
+| `tests/knowledge_tests.pl` | Integritas, oracle penalaran, cakupan, dan pembanding kasus |
+| `knowledge/validasi_pakar.md`, `knowledge/kasus_validasi.json` | Prosedur peninjauan dan dataset nyata yang belum diisi |
 | `tests/skenario_pengujian.md` | Skenario dan hasil harapan |
 | `tests/hasil_pengujian.md` | Catatan eksekusi aktual |
 | `docs/materi/README.md` | Indeks materi perkuliahan; berkas asli dibagikan terpisah |
@@ -185,7 +232,7 @@ Baca gejala dan aturan sebelum mengubah pengetahuan, lalu rancangan dan tes sebe
 
 ## Repository dan akses tim
 
-Repository tim: [FaisaHadi/sistem-pakar-laptop-prolog](https://github.com/FaisaHadi/sistem-pakar-laptop-prolog), dengan visibilitas **private** yang telah disetujui pemilik. Branch utama `main`; remote lokal `origin` mengarah ke repository ini. Daftar izin `.gitignore` dibatasi ke 17 path sumber, tes, dan dokumentasi yang sudah ditinjau. Berkas baru memerlukan penambahan izin secara sengaja. [Hasil persiapan Git](docs/persiapan_github.md) mempertahankan catatan keadaan awal sebelum commit.
+Repository tim: [FaisaHadi/sistem-pakar-laptop-prolog](https://github.com/FaisaHadi/sistem-pakar-laptop-prolog), dengan visibilitas **private** yang telah disetujui pemilik. Branch utama `main`; remote lokal `origin` mengarah ke repository ini. Versi web berada di `alpha-v-1.0`. Daftar izin `.gitignore` mencakup path sumber, antarmuka web, tes, dan dokumentasi yang sudah ditinjau. Berkas baru memerlukan penambahan izin secara sengaja. [Hasil persiapan Git](docs/persiapan_github.md) mempertahankan catatan keadaan awal sebelum commit.
 
 Anggota memerlukan akses dari pemilik karena repository private. Akun anggota belum ditentukan dan undangan belum dikirim. Setelah akses tersedia:
 
