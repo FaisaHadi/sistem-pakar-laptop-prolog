@@ -34,7 +34,7 @@
           <aside class="hero-card" aria-label="Ringkasan konsultasi">
             <div class="hero-card-top"><span>YOUR SESSION</span><span class="sparkle">✳</span></div>
             <div class="hero-card-number" id="hero-count">15</div>
-            <div class="hero-card-label">gejala untuk ditelusuri</div>
+            <div class="hero-card-label">gejala dalam basis pengetahuan</div>
             <div class="hero-card-divider"></div>
             <div class="hero-card-bottom"><span class="tiny-check">✓</span> Jawaban Anda tidak dinilai benar atau salah.</div>
             <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
@@ -45,17 +45,40 @@
           <div class="consultation-column">
             <div class="section-heading">
               <div><p class="eyebrow muted">01 / KONSULTASI</p><h2>Mulai dari yang Anda tahu</h2></div>
-              <span class="session-badge"><span class="live-dot"></span> SESI BARU</span>
+              <span class="session-badge"><span class="live-dot"></span> <span id="session-state">SESI BARU</span></span>
             </div>
 
-            <article class="question-card" id="question-card" aria-live="polite">
+            <form class="device-form" id="device-form" aria-labelledby="device-heading">
+              <h3 id="device-heading" tabindex="-1">Laptop yang akan dikonsultasikan</h3>
+              <p id="scope-notice">Memuat cakupan pengetahuan...</p>
+              <div class="device-fields">
+                <label for="device-brand">Merek
+                  <select id="device-brand" disabled><option value="tidak_diketahui">Belum diketahui</option></select>
+                </label>
+                <label for="device-model">Model <span>(opsional)</span>
+                  <input id="device-model" type="text" maxlength="80" autocomplete="off" placeholder="Contoh: ThinkPad T14" />
+                </label>
+              </div>
+              <p>Nama model memberi konteks; aplikasi belum memverifikasi dukungan model secara otomatis. Tidak perlu memasukkan nomor seri.</p>
+              <details class="path-details"><summary>Rujukan dan batas penggunaan</summary><div id="scope-sources"></div></details>
+              <p class="request-error" id="device-error" role="alert" hidden></p>
+              <button class="back-button" id="retry-knowledge" type="button" hidden>Muat ulang cakupan</button>
+              <button class="continue-button" id="start-button" type="submit" disabled>Memuat cakupan...</button>
+            </form>
+            <div class="device-summary" id="device-summary" hidden>
+              <p id="device-label"></p>
+              <button class="back-button" id="change-device" type="button">Ganti perangkat dan mulai ulang</button>
+            </div>
+            <article class="question-card" id="question-card" aria-live="polite" hidden>
               <div class="question-card-head">
                 <span class="step-label" id="step-label">MEMUAT KONSULTASI</span>
-                <button class="help-button" id="help-toggle" type="button" aria-expanded="false" aria-controls="question-help">Butuh konteks? <span>＋</span></button>
+                <span class="adaptive-label">Pertanyaan sesuai jawaban Anda</span>
               </div>
-              <div class="progress-track" role="progressbar" aria-label="Progres konsultasi" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0" id="progress-track"><span id="progress-fill"></span></div>
+              <div class="progress-track" role="progressbar" aria-label="Jumlah gejala yang dijawab" aria-valuemin="0" aria-valuemax="15" aria-valuenow="0" id="progress-track"><span id="progress-fill"></span></div>
               <div id="question-body" class="question-body"><div class="loading-mark"><span></span><span></span><span></span></div><p>Menyiapkan pertanyaan...</p></div>
-              <div class="question-help" id="question-help" hidden></div>
+              <div class="question-help" id="help-area" hidden><strong>Sebelum menjawab</strong><p id="question-help"></p></div>
+              <details class="question-reason" id="question-reason" hidden><summary>Mengapa pertanyaan ini muncul?</summary><p id="reason-text"></p><div id="reason-details"></div></details>
+              <p class="request-error" id="request-error" role="alert" hidden></p>
               <div class="answer-list" id="answer-list" role="group" aria-label="Pilih jawaban"></div>
               <div class="question-actions">
                 <button class="back-button" id="back-button" type="button" disabled><span aria-hidden="true">←</span> Kembali</button>
@@ -70,10 +93,11 @@
           <aside class="side-column">
             <article class="progress-card">
               <div class="side-card-head"><span>PROGRES</span><span class="side-card-icon">↗</span></div>
-              <div class="progress-number"><span id="answered-count">0</span><small> / <span id="question-total">15</span></small></div>
+              <div class="progress-number"><span id="answered-count">0</span><small> / maks. <span id="question-total">15</span></small></div>
               <p>gejala sudah dijawab</p>
               <div class="mini-progress"><span id="mini-progress-fill"></span></div>
-              <div class="progress-caption"><span>Perjalanan konsultasi</span><span id="progress-percent">0%</span></div>
+              <div class="progress-caption"><span id="progress-caption">Cakupan gejala</span><span id="progress-percent">Maks. 15</span></div>
+              <p class="adaptive-note">Pertanyaan yang tidak diperlukan akan dilewati.</p>
             </article>
 
             <article class="tip-card">
