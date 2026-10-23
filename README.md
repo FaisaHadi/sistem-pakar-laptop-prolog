@@ -2,6 +2,17 @@
 
 Proyek tugas besar kelompok mata kuliah Kecerdasan Buatan. Aplikasi terminal dan web lokal menggunakan **SWI-Prolog**, fakta dan aturan, serta **backward chaining** untuk mencocokkan jawaban pengguna dengan dugaan gangguan laptop. Hasil memuat status, jalur aturan, alasan, informasi yang kurang, dan saran untuk dugaan yang didukung.
 
+## Identitas kelompok
+
+**Kelompok 1 — Kelas B**
+
+| No. | Nama anggota | NPM |
+| --- | --- | --- |
+| 1 | Fiqri Mochamad Fadilah | 247006111051 |
+| 2 | Faisal Hadi Saik | 247006111052 |
+| 3 | Irsyad Khoerul Umam | 247006111055 |
+| 4 | Muhammad Fadhil Nurwahid | 247006111056 |
+
 **Status per 22 Oktober 2026: prototipe terminal sudah diimplementasikan dan bahasa konsultasi sudah direvisi. Seluruh pengetahuan masih DRAF, belum divalidasi teknisi atau diuji sebagai diagnosis pada perangkat nyata.** Hasil program bukan diagnosis final dan tidak memakai persentase kepastian.
 
 **Pembaruan 23 Oktober 2026:** web Gamaban kini menanyakan gejala sesuai penelusuran Prolog, selalu menampilkan panduan jawaban, mendukung koreksi dengan penghitungan ulang jalur, dan merangkum hasil dengan detail yang dapat dibuka. Validasi API dan konsultasi adaptif memiliki tes HTTP tersendiri. Penyempurnaan sistem pakar menambah R12–R14 untuk bukti pemeriksaan langsung, konteks lintas merek, sumber/batas tiap aturan, validator pengetahuan, dan pembanding kasus teknisi.
@@ -44,7 +55,7 @@ Rincian ini mengikuti M04 halaman 1 dan M03 slide 54. Identitas berkas, bagian m
 | Keputusan proyek | Diagnosis awal laptop dengan SWI-Prolog, terminal, fakta/aturan, backward chaining, dugaan beserta alasan dan saran. |
 | Target awal kelompok | 5 gangguan, 15 gejala, 2 indikasi antara, 11 aturan, dan 5 saran. Jumlah ini cakupan proyek, bukan syarat jumlah minimum dari dosen. |
 
-Tanggal kalender, format laporan, durasi video, nama anggota, dan penanggung jawab belum tersedia dalam ketentuan yang dibaca. Tim perlu melengkapinya melalui koordinasi, tanpa menganggap prototipe yang lulus tes berarti seluruh luaran tugas sudah selesai.
+Identitas anggota tercantum pada bagian Identitas kelompok di atas. Tanggal kalender, format laporan, durasi video, dan penanggung jawab tiap bagian masih perlu dilengkapi melalui koordinasi, tanpa menganggap prototipe yang lulus tes berarti seluruh luaran tugas sudah selesai.
 
 ## Perangkat kerja
 
